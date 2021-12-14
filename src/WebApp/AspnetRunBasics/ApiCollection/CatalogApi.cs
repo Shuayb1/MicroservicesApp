@@ -2,10 +2,12 @@
 using AspnetRunBasics.ApiCollection.Interfaces;
 using AspnetRunBasics.Models;
 using AspnetRunBasics.Settings;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AspnetRunBasics.ApiCollection
@@ -19,24 +21,50 @@ namespace AspnetRunBasics.ApiCollection
             _settings = settings;
         }
 
-        public Task<CatalogModel> CreateCatalog(CatalogModel catalogModel)
+        public async Task<IEnumerable<CatalogModel>> GetCatalog()
         {
-            throw new NotImplementedException();
+            var message = new HttpRequestBuilder(_settings.BaseAddress)
+                            .SetPath(_settings.CatalogPath)
+                            .HttpMethod(HttpMethod.Get)
+                            .GetHttpMessage();
+
+            return await SendRequest<IEnumerable<CatalogModel>>(message); 
         }
 
-        public Task<IEnumerable<CatalogModel>> GetCatalog()
+        public async Task<CatalogModel> CreateCatalog(CatalogModel catalogModel)
         {
-            throw new NotImplementedException();
+            var message = new HttpRequestBuilder(_settings.BaseAddress)
+                                        .SetPath(_settings.CatalogPath)
+                                        .HttpMethod(HttpMethod.Post)
+                                        .GetHttpMessage();
+
+            var json = JsonConvert.SerializeObject(catalogModel);
+            message.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            return await SendRequest<CatalogModel>(message);
         }
 
-        public Task<CatalogModel> GetCatalog(string id)
+       
+        public async Task<CatalogModel> GetCatalog(string id)
         {
-            throw new NotImplementedException();
+            var message = new HttpRequestBuilder(_settings.BaseAddress)
+                                        .AddToPath(id)
+                                        .SetPath(_settings.CatalogPath)
+                                        .HttpMethod(HttpMethod.Get)
+                                        .GetHttpMessage();
+
+            return await SendRequest<CatalogModel>(message);
         }
 
-        public Task<IEnumerable<CatalogModel>> GetCatalogByCategory(string category)
+        public async Task<IEnumerable<CatalogModel>> GetCatalogByCategory(string category)
         {
-            throw new NotImplementedException();
+            var message = new HttpRequestBuilder(_settings.BaseAddress)
+                                        .SetPath(_settings.CatalogPath)
+                                        .AddToPath("GetProductByCategory")
+                                        .AddToPath(category)
+                                        .HttpMethod(HttpMethod.Get)
+                                        .GetHttpMessage();
+
+            return await SendRequest<IEnumerable<CatalogModel>>(message);
         }
 
         public override HttpRequestBuilder GetHttpRequestBuilder(string path)
